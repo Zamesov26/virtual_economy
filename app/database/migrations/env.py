@@ -10,6 +10,7 @@ from sqlalchemy import engine_from_config, pool
 sys.path.insert(0, dirname(dirname(dirname((dirname(abspath(__file__)))))))
 
 from app.database.base import Base
+from app.database.models import *
 from app.settings import Settings
 
 settings = Settings()
