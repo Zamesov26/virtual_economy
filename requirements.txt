@@ -1,0 +1,9 @@
+pydantic==2.11.10
+starlette==0.48.0
+pydantic-settings==2.11.0
+fastapi==0.118.0
+sqlalchemy==2.0.43
+python-dotenv==1.1.1
+asyncpg==0.30.0
+alembic==1.16.5
+uvicorn[standard]
