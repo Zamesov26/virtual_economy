@@ -1,5 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.database.models import Inventory
 
@@ -33,3 +34,11 @@ class InventoryRepository:
             select(Inventory).where(Inventory.user_id == user_id)
         )
         return list(result.scalars().all())
+
+    async def get_by_user(self, user_id: int) -> list[Inventory]:
+        stmt = (
+            select(Inventory)
+            .where(Inventory.user_id == user_id)
+            .options(selectinload(Inventory.product))
+        )
+        return list(await self.session.scalars(stmt))

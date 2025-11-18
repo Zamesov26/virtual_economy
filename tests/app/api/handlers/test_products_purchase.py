@@ -1,6 +1,7 @@
 import json
 
 import pytest
+from freezegun import freeze_time
 from httpx import AsyncClient
 from sqlalchemy import select
 
@@ -9,9 +10,7 @@ from app.database.models.product import ProductType
 
 
 @pytest.mark.anyio
-async def test_purchase_consumable(
-    client: AsyncClient, session_maker, override_redis, redis_mock
-):
+async def test_purchase_consumable(client: AsyncClient, session_maker, redis_mock):
     async with session_maker() as session:
         user = User(username="alex", email="alex@test.com", balance=500)
         product = Product(
@@ -28,23 +27,25 @@ async def test_purchase_consumable(
     assert response.status_code == 200
 
     async with session_maker() as session:
-        inv = await session.get(Inventory, 1)
-        assert inv is not None
-        assert inv.quantity == 1
+        items = list(
+            await session.scalars(select(Inventory).where(Inventory.user_id == user.id))
+        )
+        assert len(items) == 1
 
         user_db = await session.get(User, user.id)
         assert user_db.balance == 400
 
-    # Redis обновлён
     key = f"user:{user.id}:inventory"
     radis_cache = await redis_mock.get(key)
-    assert radis_cache == '[{"product_id": 1, "quantity": 1}]'
-    data = json.loads(radis_cache)
-    assert len(data) == 1
+    assert json.loads(radis_cache) == {
+        "consumables": [{"product_id": product.id, "quantity": 1}],
+        "permanents": [],
+    }
 
 
+@freeze_time("2025-11-18T17:08:30.016582+00:00")
 @pytest.mark.anyio
-async def test_purchase_permanent(client: AsyncClient, session_maker, override_redis):
+async def test_purchase_permanent(client: AsyncClient, session_maker, redis_mock):
     async with session_maker() as session:
         user = User(username="tom", email="tom@test.com", balance=1000)
         product = Product(
@@ -65,11 +66,22 @@ async def test_purchase_permanent(client: AsyncClient, session_maker, override_r
             await session.scalars(select(Inventory).where(Inventory.user_id == user.id))
         )
         assert len(items) == 1
+        user_db = await session.get(User, user.id)
+        assert user_db.balance == 500
+
+    key = f"user:{user.id}:inventory"
+    radis_cache = await redis_mock.get(key)
+    assert json.loads(radis_cache) == {
+        "consumables": [],
+        "permanents": [
+            {"product_id": 1, "purchased_at": "2025-11-18T17:08:30.016582Z"}
+        ],
+    }
 
 
 @pytest.mark.anyio
 async def test_conflict_when_not_enough_balance(
-    client: AsyncClient, session_maker, override_redis
+    client: AsyncClient, session_maker, redis_mock
 ):
     async with session_maker() as session:
         user = User(username="low", email="low@test.com", balance=50)
@@ -91,7 +103,7 @@ async def test_conflict_when_not_enough_balance(
 
 @pytest.mark.anyio
 async def test_conflict_when_permanent_product_already_exists(
-    client: AsyncClient, session_maker, override_redis
+    client: AsyncClient, session_maker, redis_mock
 ):
     async with session_maker() as session:
         user = User(username="kate", email="kate@test.com", balance=1000)
@@ -117,7 +129,7 @@ async def test_conflict_when_permanent_product_already_exists(
 
 @pytest.mark.anyio
 async def test_not_found_when_user_not_exists(
-    client: AsyncClient, session_maker, override_redis
+    client: AsyncClient, session_maker, redis_mock
 ):
     async with session_maker() as session:
         product = Product(
@@ -136,7 +148,7 @@ async def test_not_found_when_user_not_exists(
 
 @pytest.mark.anyio
 async def test_not_found_when_product_not_exists(
-    client: AsyncClient, session_maker, override_redis
+    client: AsyncClient, session_maker, redis_mock
 ):
     async with session_maker() as session:
         user = User(username="max", email="max@test.com", balance=500)

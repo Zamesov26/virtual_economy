@@ -9,10 +9,9 @@ __all__ = [
     "engine",
     "clear_db",
     "redis_mock",
-    "override_redis",
 ]
 
-from tests.fixtures.redis import redis_mock, override_redis
+from tests.fixtures.redis import redis_mock
 
 
 @pytest.fixture(scope="session")

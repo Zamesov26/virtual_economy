@@ -3,3 +3,4 @@ uvicorn==0.37.0
 black==25.9.0
 isort==7.0.0
 httpx==0.28.1
+freezegun==1.5.5

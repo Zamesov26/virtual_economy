@@ -1,4 +1,3 @@
-import json
 from typing import Any
 
 from fastapi import HTTPException
@@ -10,7 +9,7 @@ from app.database.models.transaction import Transaction, TransactionStatus
 from app.repositories.inventory_repository import InventoryRepository
 from app.repositories.product_repository import ProductRepository
 from app.repositories.user_repository import UserRepository
-from app.schemas.inventar import InventoryItem
+from app.services.inventory_service import InventoryService
 
 
 class PurchaseService:
@@ -23,6 +22,7 @@ class PurchaseService:
         self.user_repo = UserRepository(session)
         self.product_repo = ProductRepository(session)
         self.inventory_repo = InventoryRepository(session)
+        self.inventory_service = InventoryService(session, redis)
 
     async def purchase(self, user_id: int, product_id: int) -> dict[str, Any]:
         """Основная операция покупки товара пользователем."""
@@ -57,7 +57,8 @@ class PurchaseService:
 
         txn.status = TransactionStatus.COMPLETED
 
-        await self._refresh_inventory_cache(user_id)
+        await self.session.flush()
+        await self.inventory_service.get_inventory(user_id)
 
         return {
             "status": "ok",
@@ -82,18 +83,6 @@ class PurchaseService:
             raise HTTPException(409, "Permanent product already owned")
 
         await self.inventory_repo.add(user_id, product_id, quantity=1)
-
-    async def _refresh_inventory_cache(self, user_id: int):
-        """Перезаписывает кэш инвентаря после покупки."""
-        key = self._inventory_cache_key(user_id)
-        await self.session.flush()
-        data = await self._load_inventory(user_id)
-        await self.redis.set(key, json.dumps(data), ex=self.CACHE_TTL)
-
-    async def _load_inventory(self, user_id: int) -> list[dict[str, Any]]:
-        """Читает инвентарь напрямую из базы."""
-        items = await self.inventory_repo.list_for_user(user_id)
-        return [InventoryItem.model_validate(item).model_dump() for item in items]
 
     @staticmethod
     def _inventory_cache_key(user_id: int) -> str:
