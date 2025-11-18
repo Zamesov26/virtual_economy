@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.api.handlers.routers_v1 import api_router as v1_routers
 from app.middlewares import add_middlewares
+from app.redis.client import create_redis, close_redis
 from app.settings import Settings
 
 settings = Settings()
@@ -16,8 +17,10 @@ async def lifespan(app: FastAPI):
     app.state.session_maker = async_sessionmaker(
         app.state.engine, expire_on_commit=False
     )
+    app.state.redis = await create_redis(settings.redis)
     yield
     await app.state.engine.dispose()
+    await close_redis(app.state.redis)
 
 
 app = FastAPI(

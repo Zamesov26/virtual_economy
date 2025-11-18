@@ -25,7 +25,9 @@ async def engine():
 @pytest.fixture(scope="session")
 def session_maker(engine):
     """Создаём sessionmaker для тестов."""
-    return async_sessionmaker(engine, expire_on_commit=False)
+    return async_sessionmaker(
+        engine, expire_on_commit=False, autoflush=False, autocommit=False
+    )
 
 
 @pytest.fixture(autouse=True)

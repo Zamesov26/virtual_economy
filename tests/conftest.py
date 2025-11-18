@@ -3,7 +3,16 @@ import pytest
 from tests.fixtures.client import client
 from tests.fixtures.db import clear_db, engine, session_maker
 
-__all__ = ["session_maker", "client", "engine", "clear_db"]
+__all__ = [
+    "session_maker",
+    "client",
+    "engine",
+    "clear_db",
+    "redis_mock",
+    "override_redis",
+]
+
+from tests.fixtures.redis import redis_mock, override_redis
 
 
 @pytest.fixture(scope="session")

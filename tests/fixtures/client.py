@@ -1,7 +1,7 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from app.dependencies import get_session
+from app.database.deps import get_session
 from app.main import app
 
 

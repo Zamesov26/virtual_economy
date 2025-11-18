@@ -6,4 +6,5 @@ sqlalchemy==2.0.43
 python-dotenv==1.1.1
 asyncpg==0.30.0
 alembic==1.16.5
+redis==7.0.1
 uvicorn[standard]

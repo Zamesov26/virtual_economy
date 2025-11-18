@@ -21,8 +21,7 @@ class User(Base):
     balance: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC), nullable=False
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
     )
 
     inventory: Mapped[list["Inventory"]] = relationship(back_populates="user")
