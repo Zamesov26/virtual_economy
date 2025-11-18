@@ -27,7 +27,7 @@ class PurchaseService:
     async def purchase(self, user_id: int, product_id: int) -> dict[str, Any]:
         """Основная операция покупки товара пользователем."""
 
-        user = await self.user_repo.get(user_id)
+        user = await self.user_repo.get_for_update(user_id)
         if not user:
             raise HTTPException(404, "User not found")
 
