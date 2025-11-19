@@ -1,11 +1,12 @@
 import json
+
 import pytest
 from freezegun import freeze_time
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database.models import User, Product, Inventory
+from app.database.models import Inventory, Product, User
 from app.database.models.product import ProductType
 
 

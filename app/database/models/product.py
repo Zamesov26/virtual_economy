@@ -1,7 +1,9 @@
 import enum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Text, Integer, String, Boolean, Enum as SAEnum
+from sqlalchemy import Boolean
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy import Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base

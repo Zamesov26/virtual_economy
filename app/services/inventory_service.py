@@ -2,9 +2,9 @@ import json
 
 from app.repositories.inventory_repository import InventoryRepository
 from app.schemas.inventar import (
-    InventorySchema,
-    InventoryPermanentsItem,
     InventoryConsumableItem,
+    InventoryPermanentsItem,
+    InventorySchema,
 )
 
 

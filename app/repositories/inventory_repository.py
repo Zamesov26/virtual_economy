@@ -42,3 +42,17 @@ class InventoryRepository:
             .options(selectinload(Inventory.product))
         )
         return list(await self.session.scalars(stmt))
+
+    async def get_consumable_for_update(self, user_id: int, product_id: int):
+        stmt = (
+            select(Inventory)
+            .where(
+                Inventory.user_id == user_id,
+                Inventory.product_id == product_id,
+            )
+            .with_for_update()
+        )
+        return await self.session.scalar(stmt)
+
+    async def save(self, item: Inventory):
+        self.session.add(item)

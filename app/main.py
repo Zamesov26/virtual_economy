@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.api.handlers.routers_v1 import api_router as v1_routers
 from app.middlewares import add_middlewares
-from app.redis.client import create_redis, close_redis
+from app.redis.client import close_redis, create_redis
 from app.settings import Settings
 
 settings = Settings()

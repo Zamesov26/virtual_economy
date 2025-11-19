@@ -6,7 +6,7 @@ from app.database.deps import get_session
 from app.redis.deps import get_redis
 from app.services.purchase_service import PurchaseService
 
-router = APIRouter()
+router = APIRouter(tags=["Products"])
 
 
 @router.post("/products/{product_id}/purchase")
