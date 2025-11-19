@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.deps import get_session
 from app.redis.deps import get_redis
 from app.services.user_service import UserService
+from app.utils.rate_limiter import simple_rate_limit
 
 router = APIRouter(tags=["Users"])
 
@@ -28,6 +29,7 @@ async def add_funds(
     idempotency_key: str = Header(..., alias="Idempotency-Key"),
     session: AsyncSession = Depends(get_session),
     redis: Redis = Depends(get_redis),
+    _rl=Depends(simple_rate_limit(5, 60)),
 ):
     service = UserService(session, redis)
 

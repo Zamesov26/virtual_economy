@@ -2,9 +2,7 @@ import json
 
 from app.database.models.product import ProductType
 from app.repositories.inventory_repository import InventoryRepository
-from app.schemas.inventar import (
-    InventorySchema,
-)
+from app.schemas.inventar import InventorySchema
 
 
 class InventoryService:

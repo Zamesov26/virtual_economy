@@ -34,7 +34,7 @@ class TestPurchaseConsumable:
         product = Product(**data, price=price, type=type_, is_active=is_acitve)
         session.add(product)
         return product
-    
+
     async def _add_inventory(self, session: AsyncSession, user_id, product_id, qty=1):
         item = Inventory(
             user_id=user_id,
@@ -142,7 +142,9 @@ class TestPurchaseConsumable:
             )
             await session.flush()
 
-            inv = await self._add_inventory(session, user_id=user.id, product_id=product.id)
+            inv = await self._add_inventory(
+                session, user_id=user.id, product_id=product.id
+            )
             await session.commit()
 
         response = await client.post(

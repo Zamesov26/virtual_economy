@@ -9,9 +9,11 @@ __all__ = [
     "engine",
     "clear_db",
     "redis_mock",
+    "register_test_router",
 ]
 
 from tests.fixtures.redis import redis_mock
+from tests.fixtures.routers import register_test_router
 
 
 @pytest.fixture(scope="session")
