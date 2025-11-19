@@ -6,7 +6,7 @@ from app.database.base import Base
 
 # TODO config
 TEST_DATABASE_URL = (
-    "postgresql+asyncpg://postgres:postgres@localhost:5432/test_wallet_db"
+    "postgresql+asyncpg://postgres:postgres@localhost:5432/test_virtual_economy"
 )
 
 
