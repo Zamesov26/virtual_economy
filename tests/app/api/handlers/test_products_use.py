@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 
 from app.database.models import Inventory, Product, User
 from app.database.models.product import ProductType
@@ -15,7 +15,9 @@ class TestUseConsumable:
         await session.refresh(user)
         return user
 
-    async def _create_product(self, session, type_: ProductType=ProductType.CONSUMABLE):
+    async def _create_product(
+        self, session, type_: ProductType = ProductType.CONSUMABLE
+    ):
         product = Product(
             name="Potion",
             price=10,

@@ -74,7 +74,7 @@ async def test_purchase_permanent(client: AsyncClient, session_maker, redis_mock
     assert json.loads(radis_cache) == {
         "consumables": [],
         "permanents": [
-            {"product_id": 1, "purchased_at": "2025-11-18T17:08:30.016582Z"}
+            {"product_id": product.id, "purchased_at": "2025-11-18T17:08:30.016582Z"}
         ],
     }
 
@@ -154,7 +154,6 @@ async def test_not_found_when_product_not_exists(
         user = User(username="max", email="max@test.com", balance=500)
         session.add(user)
         await session.commit()
-        await session.refresh(user)
 
     response = await client.post(
         "api/v1/products/777/purchase", params={"user_id": user.id}
