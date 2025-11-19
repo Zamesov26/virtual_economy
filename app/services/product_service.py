@@ -15,15 +15,16 @@ class ProductUseService:
 
     async def use_product(self, user_id: int, product_id: int):
         async with self.session.begin():
-            product = await self.product_repo.get(product_id)
+            # если is_active это возможность для покупки
+            product = await self.product_repo.get(product_id, is_active=False)
             if not product:
                 raise HTTPException(404, "Product not found")
 
             if product.type != ProductType.CONSUMABLE:
                 raise HTTPException(400, "Product is not consumable")
 
-            item = await self.inventory_repo.get_consumable_for_update(
-                user_id, product_id
+            item = await self.inventory_repo.get(
+                user_id, product_id, with_for_update=True
             )
 
             if not item:
@@ -37,7 +38,8 @@ class ProductUseService:
             if item.quantity == 0:
                 await self.session.delete(item)
             else:
-                await self.inventory_repo.save(item)
+                self.session.add(item)
+            await self.session.commit()
 
         await self.redis.delete(f"user:{user_id}:inventory")
 

@@ -16,8 +16,6 @@ async def purchase(
     session: AsyncSession = Depends(get_session),
     redis: Redis = Depends(get_redis),
 ):
-    async with session.begin():
-        service = PurchaseService(session, redis)
-        result = await service.purchase(user_id, product_id)
-        await session.commit()
+    service = PurchaseService(session, redis)
+    result = await service.purchase(user_id, product_id)
     return result

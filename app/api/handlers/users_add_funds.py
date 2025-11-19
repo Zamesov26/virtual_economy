@@ -37,5 +37,4 @@ async def add_funds(
         idem_key=idempotency_key,
     )
 
-    res = UserBalanceResponse.model_validate(user).model_dump()
-    return res
+    return UserBalanceResponse.model_validate(user).model_dump()

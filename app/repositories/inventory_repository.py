@@ -9,17 +9,24 @@ class InventoryRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get(self, user_id: int, product_id: int) -> Inventory | None:
-        result = await self.session.execute(
-            select(Inventory).where(
-                Inventory.user_id == user_id,
-                Inventory.product_id == product_id,
-            )
+    async def get(
+        self, user_id: int, product_id: int, with_for_update=False
+    ) -> Inventory | None:
+        stmt = select(Inventory).where(
+            Inventory.user_id == user_id, Inventory.product_id == product_id
         )
+        if with_for_update:
+            stmt.with_for_update()
+        result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
     async def exists(self, user_id: int, product_id: int) -> bool:
-        return (await self.get(user_id, product_id)) is not None
+        stmt = select(
+            select(1)
+            .where(Inventory.user_id == user_id, Inventory.product_id == product_id)
+            .exists()
+        )
+        return (await self.session.execute(stmt)).scalar()
 
     async def add(self, user_id: int, product_id: int, quantity: int = 1):
         inv = Inventory(
@@ -29,12 +36,6 @@ class InventoryRepository:
         )
         self.session.add(inv)
 
-    async def list_for_user(self, user_id: int) -> list[Inventory]:
-        result = await self.session.execute(
-            select(Inventory).where(Inventory.user_id == user_id)
-        )
-        return list(result.scalars().all())
-
     async def get_by_user(self, user_id: int) -> list[Inventory]:
         stmt = (
             select(Inventory)
@@ -42,17 +43,3 @@ class InventoryRepository:
             .options(selectinload(Inventory.product))
         )
         return list(await self.session.scalars(stmt))
-
-    async def get_consumable_for_update(self, user_id: int, product_id: int):
-        stmt = (
-            select(Inventory)
-            .where(
-                Inventory.user_id == user_id,
-                Inventory.product_id == product_id,
-            )
-            .with_for_update()
-        )
-        return await self.session.scalar(stmt)
-
-    async def save(self, item: Inventory):
-        self.session.add(item)

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 
 class InventoryConsumableItem(BaseModel):
@@ -14,7 +14,7 @@ class InventoryPermanentsItem(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
         ser_json_encoders={
-            datetime: lambda dt: dt.isoformat(),  # или любой свой формат
+            datetime: lambda dt: dt.isoformat(),
         },
     )
 

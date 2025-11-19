@@ -26,39 +26,41 @@ class PurchaseService:
 
     async def purchase(self, user_id: int, product_id: int) -> dict[str, Any]:
         """Основная операция покупки товара пользователем."""
+        async with self.session.begin():
 
-        user = await self.user_repo.get_for_update(user_id)
-        if not user:
-            raise HTTPException(404, "User not found")
+            user = await self.user_repo.get(user_id, with_for_update=True)
+            if not user:
+                raise HTTPException(404, "User not found")
 
-        product = await self.product_repo.get(product_id)
-        if not product or not product.is_active:
-            raise HTTPException(404, "Product not found or inactive")
+            product = await self.product_repo.get(product_id)
+            if not product or not product.is_active:
+                raise HTTPException(404, "Product not found or inactive")
 
-        if user.balance < product.price:
-            raise HTTPException(409, "Not enough funds")
+            if user.balance < product.price:
+                raise HTTPException(409, "Not enough funds")
 
-        user.balance -= product.price
-        self.session.add(user)
+            user.balance -= product.price
+            self.session.add(user)
 
-        if product.type == ProductType.CONSUMABLE:
-            await self._process_consumable(user_id, product_id)
+            if product.type == ProductType.CONSUMABLE:
+                await self._process_consumable(user_id, product_id)
 
-        elif product.type == ProductType.PERMANENT:
-            await self._process_permanent(user_id, product_id)
+            elif product.type == ProductType.PERMANENT:
+                await self._process_permanent(user_id, product_id)
 
-        txn = Transaction(
-            user_id=user_id,
-            product_id=product_id,
-            amount=product.price,
-            status=TransactionStatus.PENDING,
-        )
-        self.session.add(txn)
+            txn = Transaction(
+                user_id=user_id,
+                product_id=product_id,
+                amount=product.price,
+                status=TransactionStatus.PENDING,
+            )
+            self.session.add(txn)
 
-        txn.status = TransactionStatus.COMPLETED
+            txn.status = TransactionStatus.COMPLETED
 
-        await self.session.flush()
-        await self.inventory_service.get_inventory(user_id)
+            await self.session.flush()
+            await self.inventory_service.get_inventory(user_id)
+            await self.session.commit()
 
         return {
             "status": "ok",
@@ -69,7 +71,7 @@ class PurchaseService:
 
     async def _process_consumable(self, user_id: int, product_id: int):
         """Увеличивает quantity consumable товара."""
-        inv = await self.inventory_repo.get(user_id, product_id)
+        inv = await self.inventory_repo.get(user_id, product_id, with_for_update=True)
 
         if inv:
             inv.quantity += 1

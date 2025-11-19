@@ -1,9 +1,8 @@
 import json
 
+from app.database.models.product import ProductType
 from app.repositories.inventory_repository import InventoryRepository
 from app.schemas.inventar import (
-    InventoryConsumableItem,
-    InventoryPermanentsItem,
     InventorySchema,
 )
 
@@ -31,10 +30,12 @@ class InventoryService:
         for item in inventory:
             product = item.product
 
-            if product.type == "consumable":
+            if product.type == ProductType.CONSUMABLE:
                 consumables.append(item)
-            else:
+            elif product.type == ProductType.PERMANENT:
                 permanents.append(item)
+            else:
+                raise NotImplemented
 
         dto = InventorySchema(
             consumables=consumables,

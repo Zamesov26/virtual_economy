@@ -12,12 +12,9 @@ from app.database.models.product import ProductType
 
 @pytest.mark.anyio
 class TestUserInventory:
-
     async def _create_user(self, session: AsyncSession):
         user = User(username="test", email="t@test.com", balance=0)
         session.add(user)
-        await session.commit()
-        await session.refresh(user)
         return user
 
     async def _create_product(self, session: AsyncSession, name, price, type):
@@ -28,8 +25,6 @@ class TestUserInventory:
             is_active=True,
         )
         session.add(product)
-        await session.commit()
-        await session.refresh(product)
         return product
 
     async def _add_inventory(self, session: AsyncSession, user_id, product_id, qty=1):
@@ -39,8 +34,6 @@ class TestUserInventory:
             quantity=qty,
         )
         session.add(item)
-        await session.commit()
-        await session.refresh(item)
         return item
 
     async def test_inventory_from_db(
@@ -53,9 +46,10 @@ class TestUserInventory:
                 session, "Potion", 10, ProductType.CONSUMABLE
             )
             p2 = await self._create_product(session, "Sword", 20, ProductType.PERMANENT)
-
+            await session.flush()
             inv1 = await self._add_inventory(session, user.id, p1.id, qty=2)
             inv2 = await self._add_inventory(session, user.id, p2.id, qty=1)
+            await session.commit()
 
         response = await client.get(f"/api/v1/users/{user.id}/inventory")
         assert response.status_code == 200
@@ -87,7 +81,7 @@ class TestUserInventory:
         assert response.status_code == 200
         assert response.json() == cached
 
-    async def test_inventory_cache_write(
+    async def test_success_inventory_cache_write(
         self, client: AsyncClient, session_maker, redis_mock: Redis
     ):
         async with session_maker() as session:
@@ -95,7 +89,9 @@ class TestUserInventory:
             product = await self._create_product(
                 session, "Potion", 10, ProductType.CONSUMABLE
             )
+            await session.flush()
             await self._add_inventory(session, user.id, product.id, qty=3)
+            await session.commit()
 
         cache_key = f"user:{user.id}:inventory"
         assert await redis_mock.get(cache_key) is None
@@ -110,11 +106,12 @@ class TestUserInventory:
         assert cached["consumables"][0]["product_id"] == product.id
         assert cached["consumables"][0]["quantity"] == 3
 
-    async def test_inventory_empty(
+    async def test_success_when_inventory_empty(
         self, client: AsyncClient, session_maker, redis_mock
     ):
         async with session_maker() as session:
             user = await self._create_user(session)
+            await session.commit()
 
         response = await client.get(f"/api/v1/users/{user.id}/inventory")
         assert response.status_code == 200
@@ -123,8 +120,9 @@ class TestUserInventory:
         assert data["consumables"] == []
         assert data["permanents"] == []
 
-    async def test_inventory_user_not_found(self, client: AsyncClient, redis_mock):
+    async def test_not_found_when_user_not_exists(
+        self, client: AsyncClient, redis_mock
+    ):
         response = await client.get("/api/v1/users/999999/inventory")
 
-        # Если решишь позже вернуть 404 — можно поменять.
         assert response.status_code == 200
