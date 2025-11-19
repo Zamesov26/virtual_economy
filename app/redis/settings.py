@@ -15,6 +15,6 @@ class RedisSettings(BaseSettings):
 
     @property
     def url(self) -> str:
-        if self.password:
+        if self.password in (None, "", "<none>"):
             return f"redis://:{self.password}@{self.host}:{self.port}/{self.db}"
         return f"redis://{self.host}:{self.port}/{self.db}"
