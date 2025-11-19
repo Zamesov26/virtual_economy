@@ -2,7 +2,7 @@ import enum
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, Index
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy import ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -27,7 +27,7 @@ class Transaction(Base):
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     product_id: Mapped[int] = mapped_column(
-        ForeignKey("products.id", ondelete="CASCADE")
+        ForeignKey("products.id", ondelete="CASCADE"), index=True
     )
 
     amount: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -41,10 +41,15 @@ class Transaction(Base):
         default=TransactionStatus.PENDING,
         server_default="pending",
         nullable=False,
+        index=True
+    )
+    
+    __table_args__ = (
+        Index("idx_transactions_status_created", "status", "created_at"),
     )
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False, index=True
     )
 
     user: Mapped["User"] = relationship(back_populates="transactions")
