@@ -11,7 +11,7 @@ class UserRepository:
     async def get(self, user_id: int, with_for_update=False):
         stmt = select(User).where(User.id == user_id)
         if with_for_update:
-            stmt.with_for_update()
+            stmt = stmt.with_for_update()
 
         return await self.session.scalar(stmt)
 
