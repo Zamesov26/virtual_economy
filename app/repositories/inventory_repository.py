@@ -16,7 +16,7 @@ class InventoryRepository:
             Inventory.user_id == user_id, Inventory.product_id == product_id
         )
         if with_for_update:
-            stmt.with_for_update()
+            stmt = stmt.with_for_update()
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 

@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.api.handlers import (
     analytics_popular_products,
+    auth_register,
     life_handler,
     products_purchase,
     products_use,
@@ -11,8 +12,13 @@ from app.api.handlers import (
 
 api_router = APIRouter()
 api_router.include_router(life_handler.router)
+
 api_router.include_router(products_purchase.router)
 api_router.include_router(products_use.router)
+
 api_router.include_router(users_inventory.router)
 api_router.include_router(users_add_funds.router)
+
 api_router.include_router(analytics_popular_products.router)
+
+api_router.include_router(auth_register.router)

@@ -38,7 +38,9 @@ class Product(Base):
         nullable=False,
     )
 
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False, index=True)
+    is_active: Mapped[bool] = mapped_column(
+        Boolean, default=True, nullable=False, index=True
+    )
 
     inventory_items: Mapped[list["Inventory"]] = relationship(back_populates="product")
     transactions: Mapped[list["Transaction"]] = relationship(back_populates="product")

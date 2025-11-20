@@ -1,4 +1,4 @@
-pydantic==2.11.10
+pydantic[email]==2.11.10
 starlette==0.48.0
 pydantic-settings==2.11.0
 fastapi==0.118.0
@@ -9,3 +9,5 @@ alembic==1.16.5
 redis==7.0.1
 uvicorn[standard]==0.37.0
 celery==5.5.3
+bcrypt==5.0.0
+passlib==1.7.4

@@ -2,9 +2,9 @@ import enum
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Index
+from sqlalchemy import DateTime
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy import ForeignKey, Integer
+from sqlalchemy import ForeignKey, Index, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
@@ -41,15 +41,16 @@ class Transaction(Base):
         default=TransactionStatus.PENDING,
         server_default="pending",
         nullable=False,
-        index=True
-    )
-    
-    __table_args__ = (
-        Index("idx_transactions_status_created", "status", "created_at"),
+        index=True,
     )
 
+    __table_args__ = (Index("idx_transactions_status_created", "status", "created_at"),)
+
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False, index=True
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+        index=True,
     )
 
     user: Mapped["User"] = relationship(back_populates="transactions")

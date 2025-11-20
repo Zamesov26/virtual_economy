@@ -22,7 +22,7 @@ class UserService:
             raise HTTPException(status_code=400, detail="Amount must be > 0")
 
         async with self.session.begin():
-            user = await self.user_repository.get_for_update(user_id)
+            user = await self.user_repository.get(user_id, with_for_update=True)
             if not user:
                 raise HTTPException(status_code=404, detail="User not found")
 
