@@ -1,8 +1,8 @@
 from fastapi import HTTPException
-from pydantic import BaseModel, Field
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.exceptions.user import UserIdempotencyConflictError, UserInvalidTopUpAmountError, UserNotFoundError
 from app.repositories.user_repository import UserRepository
 
 
@@ -16,15 +16,15 @@ class UserService:
 
     async def add_funds(self, user_id: int, amount: int, idem_key: str):
         if await self.redis.exists(f"idempotency:{idem_key}"):
-            raise HTTPException(status_code=409, detail="Duplicate top-up request")
+            raise UserIdempotencyConflictError()
 
         if amount <= 0:
-            raise HTTPException(status_code=400, detail="Amount must be > 0")
+            raise UserInvalidTopUpAmountError()
 
         async with self.session.begin():
             user = await self.user_repository.get_for_update(user_id)
             if not user:
-                raise HTTPException(status_code=404, detail="User not found")
+                raise UserNotFoundError()
 
             user.balance += amount
             self.session.add(user)

@@ -8,9 +8,9 @@ class ProductRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get(self, product_id: int, is_active=True):
+    async def get(self, product_id: int, with_is_active=True):
         stmt = select(Product).where(Product.id == product_id)
-        if is_active:
+        if with_is_active:
             stmt = stmt.where(Product.is_active)
 
         return await self.session.scalar(stmt)
