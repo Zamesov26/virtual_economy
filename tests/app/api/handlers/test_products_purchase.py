@@ -142,7 +142,7 @@ class TestPurchaseConsumable:
             )
             await session.flush()
 
-            inv = await self._add_inventory(
+            await self._add_inventory(
                 session, user_id=user.id, product_id=product.id
             )
             await session.commit()

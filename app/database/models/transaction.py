@@ -2,9 +2,8 @@ import enum
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, ForeignKey, Index, Integer
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy import ForeignKey, Index, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
