@@ -130,7 +130,7 @@ class TestPurchaseConsumable:
         )
 
         assert response.status_code == 409
-        assert response.json()["detail"] == "Not enough funds"
+        assert response.json()["error"]["message"] == "Not enough funds"
 
     async def test_conflict_when_permanent_product_already_exists(
         self, client: AsyncClient, session_maker, redis_mock
@@ -152,7 +152,7 @@ class TestPurchaseConsumable:
         )
 
         assert response.status_code == 409
-        assert response.json()["detail"] == "Permanent product already owned"
+        assert response.json()["error"]["message"] == "Permanent product already owned"
 
     async def test_not_found_when_user_not_exists(
         self, client: AsyncClient, session_maker, redis_mock

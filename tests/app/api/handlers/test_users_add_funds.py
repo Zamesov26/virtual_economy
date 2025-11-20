@@ -88,7 +88,7 @@ class TestAddFunds:
             json={"amount": 100},
         )
         assert response2.status_code == 409
-        assert response2.json()["detail"] == "Duplicate top-up request"
+        assert response2.json()["error"]["message"] == "Duplicate top-up request"
 
     async def test_not_found_when_user_not_exists(
         self, client: AsyncClient, redis_mock
