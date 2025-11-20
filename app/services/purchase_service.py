@@ -6,6 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models.product import ProductType
 from app.database.models.transaction import Transaction, TransactionStatus
+from app.exceptions.inventory import InventoryAlreadyOwnedError
+from app.exceptions.product import ProductInactiveError, ProductNotFoundError
+from app.exceptions.user import UserNotFoundError, UserLowBalanceError
 from app.repositories.inventory_repository import InventoryRepository
 from app.repositories.product_repository import ProductRepository
 from app.repositories.user_repository import UserRepository
@@ -26,18 +29,19 @@ class PurchaseService:
 
     async def purchase(self, user_id: int, product_id: int) -> dict[str, Any]:
         """Основная операция покупки товара пользователем."""
-        async with self.session.begin():
+        async with (self.session.begin()):
 
             user = await self.user_repo.get(user_id, with_for_update=True)
             if not user:
-                raise HTTPException(404, "User not found")
+                raise UserNotFoundError()
 
             product = await self.product_repo.get(product_id)
-            if not product or not product.is_active:
-                raise HTTPException(404, "Product not found or inactive")
+            
+            if not product:
+                raise ProductNotFoundError()
 
             if user.balance < product.price:
-                raise HTTPException(409, "Not enough funds")
+                raise UserLowBalanceError()
 
             user.balance -= product.price
             self.session.add(user)
@@ -82,7 +86,7 @@ class PurchaseService:
         """Проверяет и добавляет permanent товар."""
         exists = await self.inventory_repo.exists(user_id, product_id)
         if exists:
-            raise HTTPException(409, "Permanent product already owned")
+            raise InventoryAlreadyOwnedError()
 
         await self.inventory_repo.add(user_id, product_id, quantity=1)
 
