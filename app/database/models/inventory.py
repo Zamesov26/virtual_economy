@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, Integer, Index
+from sqlalchemy import DateTime, ForeignKey, Index, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
@@ -15,7 +15,9 @@ class Inventory(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
     product_id: Mapped[int] = mapped_column(
         ForeignKey("products.id", ondelete="CASCADE")
     )
@@ -27,7 +29,5 @@ class Inventory(Base):
 
     user: Mapped["User"] = relationship(back_populates="inventory")
     product: Mapped["Product"] = relationship(back_populates="inventory_items")
-    
-    __table_args__ = (
-        Index("idx_inventory_user_product", "user_id", "product_id"),
-    )
+
+    __table_args__ = (Index("idx_inventory_user_product", "user_id", "product_id"),)

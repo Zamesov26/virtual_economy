@@ -33,7 +33,7 @@ class InventoryService:
             elif product.type == ProductType.PERMANENT:
                 permanents.append(item)
             else:
-                raise NotImplemented
+                raise NotImplementedError
 
         dto = InventorySchema(
             consumables=consumables,

@@ -1,9 +1,8 @@
 import enum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean
+from sqlalchemy import Boolean, Integer, String, Text
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy import Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
@@ -38,7 +37,9 @@ class Product(Base):
         nullable=False,
     )
 
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False, index=True)
+    is_active: Mapped[bool] = mapped_column(
+        Boolean, default=True, nullable=False, index=True
+    )
 
     inventory_items: Mapped[list["Inventory"]] = relationship(back_populates="product")
     transactions: Mapped[list["Transaction"]] = relationship(back_populates="product")

@@ -2,7 +2,7 @@ import json
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from sqlalchemy import delete, select
+from sqlalchemy import delete
 
 from app.database.models import Product, TransactionStatus, User
 from app.database.models.transaction import Transaction

@@ -47,8 +47,8 @@ class TestUserInventory:
             )
             p2 = await self._create_product(session, "Sword", 20, ProductType.PERMANENT)
             await session.flush()
-            inv1 = await self._add_inventory(session, user.id, p1.id, qty=2)
-            inv2 = await self._add_inventory(session, user.id, p2.id, qty=1)
+            await self._add_inventory(session, user.id, p1.id, qty=2)
+            await self._add_inventory(session, user.id, p2.id, qty=1)
             await session.commit()
 
         response = await client.get(f"/api/v1/users/{user.id}/inventory")
