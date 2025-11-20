@@ -95,7 +95,7 @@ class TestUseConsumable:
             params={"user_id": user.id},
         )
         assert response.status_code == 400
-        assert response.json()["detail"] == "User does not have this item"
+        assert response.json()["error"]["message"] == "Item not found in inventory"
 
     async def test_use_zero_quantity(self, client, session_maker, redis_mock):
         async with session_maker() as session:
@@ -110,7 +110,7 @@ class TestUseConsumable:
             params={"user_id": user.id},
         )
         assert response.status_code == 400
-        assert response.json()["detail"] == "Item quantity is zero"
+        assert response.json()["error"]["message"] == "Item quantity is zero"
 
     async def test_use_non_consumable(self, client, session_maker, redis_mock):
         async with session_maker() as session:
@@ -125,7 +125,7 @@ class TestUseConsumable:
             params={"user_id": user.id},
         )
         assert response.status_code == 400
-        assert response.json()["detail"] == "Product is not consumable"
+        assert response.json()["error"]["message"] == "Product is not consumable"
 
     async def test_not_found_when_product_not_exists(self, client, redis_mock):
         response = await client.post(
@@ -133,4 +133,4 @@ class TestUseConsumable:
             params={"user_id": 1},
         )
         assert response.status_code == 404
-        assert response.json()["detail"] == "Product not found"
+        assert response.json()["error"]["message"] == "Product not found"
